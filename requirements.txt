@@ -1,0 +1,6 @@
+Flask==2.3.2
+Flask-SocketIO==5.3.4
+gevent-websocket==0.10.1
+opencv-python==4.5.5.64
+simple-websocket==0.10.1
+wlkata-mirobot-python==0.1.14
