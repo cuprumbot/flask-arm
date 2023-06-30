@@ -54,10 +54,44 @@ def handle_message(message):
 
     try:
         timestamp = int(jsonMsg['ts'])
-        joint = int(jsonMsg['joint'])
-        action = int(jsonMsg['action'])
+
         if (timestamp > lastTimestamp):
-            ra.moveSingleJointRelative(joint, action)
+
+            if (jsonMsg['joint'] == 'xyz'):
+                x = int(jsonMsg['x'])
+                y = int(jsonMsg['y'])
+                z = int(jsonMsg['z'])
+                #pitch = int(jsonMsg['pitch'])
+                #yaw = int(jsonMsg['yaw'])
+                #roll = int(jsonMsg['roll'])
+                pitch = 0
+                yaw = 0
+                roll = 0
+                ra.moveAllToPosition(x, y, z, pitch, yaw, roll)
+            elif (jsonMsg['joint'] == 'relxyz'):
+                x = int(jsonMsg['x'])
+                y = int(jsonMsg['y'])
+                z = int(jsonMsg['z'])
+                #pitch = int(jsonMsg['pitch'])
+                #yaw = int(jsonMsg['yaw'])
+                #roll = int(jsonMsg['roll'])
+                pitch = 0
+                yaw = 0
+                roll = 0
+                ra.moveAllToRelativePosition(x, y, z, pitch, yaw, roll)
+            elif (jsonMsg['joint'] == 'claw'):
+                action = jsonMsg['action']
+                if (action == 'open'):
+                    ra.openClaw()
+                elif (action == 'relax'):
+                    ra.relaxClaw()
+                elif (action == 'close'):
+                    ra.closeClaw()
+            else:
+                joint = int(jsonMsg['joint'])
+                action = int(jsonMsg['action'])
+                ra.moveSingleJointRelative(joint, action)
+                
     except AttributeError as ae:
         print("\n\n\nError!\nArm not initialized!")
         print(ae)
@@ -66,4 +100,6 @@ def handle_message(message):
         print(ke)
 
 if __name__ == '__main__':
+    #ra.initArm()
+    #ra.initWeb()
     socketio.run(app, host='0.0.0.0')

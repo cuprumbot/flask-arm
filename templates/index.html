@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WebSocket Example</title>
+    <title>Mirobot Control</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -10,6 +10,24 @@
         .table button {
             width: 100px;
             font-size: 14px;
+        }
+        .table-grid button {
+            width: 50px;
+            font-size: 16px
+        }
+
+        .square-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%;
+        }
+
+        .square-container canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
@@ -34,11 +52,26 @@
         });
 
         // Send a custom message to the server
-        function sendMessage(joint, action) {
+        function sendJointMessage(joint, action) {
             let msg = {
                 ts: Date.now(),
                 joint: joint,
                 action: action
+            };
+            let jsonMsg = JSON.stringify(msg);
+            socket.emit('message', jsonMsg);
+        }
+
+        function sendXYZMessage(joint, x, y, z) {
+            let msg = {
+                ts: Date.now(),
+                joint: joint,
+                x: x,
+                y: y,
+                z: z,
+                pitch: 0,
+                yaw: 0,
+                roll: 0
             };
             let jsonMsg = JSON.stringify(msg);
             socket.emit('message', jsonMsg);
@@ -49,89 +82,273 @@
 
 <section class="pt100 pb100">
     <div class="container" id="arm">
-
         <div class="row justify-content-center align-items-center">
-            <div class="col-12 col-md-4 border">
+            <div class="col-12 col-md-4 border p-2 d-flex justify-content-center">
                 <img class="img-fluid" src="{{ url_for('video_feed') }}" alt="video">
             </div>
         </div>
 
+        <div class="row justify-content-center align-items-center">
+            <div class="col-12 col-md-4 border p-2 d-flex justify-content-center">
+                <button class="btn btn-secondary" type="button" id="toggleButton">Toggle Absolute Position Controls</button>
+            </div>
+        </div>
+        <div class="row justify-content-center align-items-center collapse show" id="absControls">
+            <div class="col-12 col-md-4 border p-2 d-flex justify-content-center">
+                <div class="square-container">
+                    <canvas id="myCanvas" class="border" width="540" height="540"></canvas>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4 border p-2 d-flex justify-content-center">
+                <table class="table-grid">
+                    <tbody>
+                      <tr>
+                        <td></td>
+                        <td></td>
+                        <td><button onclick="sendXYZMessage('relxyz', 2, 0, 0, 0, 0, 0)" type="button" class="btn btn-primary btn-block">&uarr;&uarr;</button></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td><button onclick="sendXYZMessage('relxyz', 0, 0, 2, 0, 0, 0)" type="button" class="btn btn-primary btn-block">&uarr;&uarr;</button></td>
+                      </tr>
+                      <tr>
+                        <td></td>
+                        <td></td>
+                        <td><button onclick="sendXYZMessage('relxyz', 1, 0, 0, 0, 0, 0)" type="button" class="btn btn-primary btn-block">&uarr;</button></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td><button onclick="sendXYZMessage('relxyz', 0, 0, 1, 0, 0, 0)" type="button" class="btn btn-primary btn-block">&uarr;</button></td>
+                      </tr>
+                      <tr>
+                        <td><button onclick="sendXYZMessage('relxyz', 0, 2, 0, 0, 0, 0)" type="button" class="btn btn-primary btn-block">&larr;&larr;</button></td>
+                        <td><button onclick="sendXYZMessage('relxyz', 0, 1, 0, 0, 0, 0)" type="button" class="btn btn-primary btn-block">&larr;</button></td>
+                        <td><center>X/Y</center></td>
+                        <td><button onclick="sendXYZMessage('relxyz', 0, -1, 0, 0, 0, 0)" type="button" class="btn btn-primary btn-block">&rarr;</button></td>
+                        <td><button onclick="sendXYZMessage('relxyz', 0, -2, 0, 0, 0, 0)" type="button" class="btn btn-primary btn-block">&rarr;&rarr;</button></td>
+                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                        <td><center>Z</center></td>
+                      </tr>
+                      <tr>
+                        <td></td>
+                        <td></td>
+                        <td><button onclick="sendXYZMessage('relxyz', -1, 0, 0, 0, 0, 0)" type="button" class="btn btn-primary btn-block">&darr;</button></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td><button onclick="sendXYZMessage('relxyz', 0, 0, -1, 0, 0, 0)" type="button" class="btn btn-primary btn-block">&darr;</button></td>
+                      </tr>
+                      <tr>
+                        <td></td>
+                        <td></td>
+                        <td><button onclick="sendXYZMessage('relxyz', -2, 0, 0, 0, 0, 0)" type="button" class="btn btn-primary btn-block">&darr;&darr;</button></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td><button onclick="sendXYZMessage('relxyz', 0, 0, -2, 0, 0, 0)" type="button" class="btn btn-primary btn-block">&darr;&darr;</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  
+            </div>
+        </div>
+
         <div class="row justify-content-center align-items-center">  
-            
-            <div class="col-12 col-md-4 border p-3 btn-group">
+            <div class="col-12 col-md-8 border p-2 d-flex justify-content-center">
                 <table class="table">
                     <tbody>
                       <tr>
-                        <th scope="row">Joint 1</th>
+                        <th scope="row">1</th>
                         <td>Rotación</td>
                         <td>
-                            <button onclick="sendMessage(1, -1)" type="button" class="btn btn-primary btn-block">Anti horario</button>
+                            <button onclick="sendJointMessage(1, 1)" type="button" class="btn btn-primary btn-block">Anti horario</button>
                         </td>
                         <td>
-                            <button onclick="sendMessage(1, 1)" type="button" class="btn btn-primary btn-block">Horario</button>
+                            <button onclick="sendJointMessage(1, -1)" type="button" class="btn btn-primary btn-block">Horario</button>
                         </td>
                       </tr>
                       <tr>
-                        <th scope="row">Joint 2</th>
+                        <th scope="row">2</th>
                         <td>Elevación</td>
                         <td>
-                            <button onclick="sendMessage(2, -1)" type="button" class="btn btn-primary">Bajar</button>
+                            <button onclick="sendJointMessage(2, 1)" type="button" class="btn btn-primary">Bajar</button>
                         </td>
                         <td>
-                            <button onclick="sendMessage(2, 1)" type="button" class="btn btn-primary">Levantar</button>
+                            <button onclick="sendJointMessage(2, -1)" type="button" class="btn btn-primary">Subir</button>
                         </td>
                       </tr>
                       <tr>
-                        <th scope="row">Joint 3</th>
+                        <th scope="row">3</th>
                         <td>Codo</td>
                         <td>
-                            <button onclick="sendMessage(3, -1)" type="button" class="btn btn-primary">Doblar</button>
+                            <button onclick="sendJointMessage(3, 1)" type="button" class="btn btn-primary">Doblar</button>
                         </td>
                         <td>
-                            <button onclick="sendMessage(3, 1)" type="button" class="btn btn-primary">Estirar</button>
+                            <button onclick="sendJointMessage(3, -1)" type="button" class="btn btn-primary">Estirar</button>
                         </td>
                       </tr>
                       <tr>
-                        <th scope="row">Joint 4</th>
+                        <th scope="row">4</th>
                         <td>Rotación muñeca</td>
                         <td>
-                            <button onclick="sendMessage(4, -1)" type="button" class="btn btn-primary">Anti horario</button>
+                            <button onclick="sendJointMessage(4, 1)" type="button" class="btn btn-primary">Anti horario</button>
                         </td>
                         <td>
-                            <button onclick="sendMessage(4, 1)" type="button" class="btn btn-primary">Horario</button>
+                            <button onclick="sendJointMessage(4, -1)" type="button" class="btn btn-primary">Horario</button>
                         </td>
                       </tr>
                       <tr>
-                        <th scope="row">Joint 5</th>
-                        <td>Extensión muñeca</td>
+                        <th scope="row">5</th>
+                        <td>Elevación muñeca</td>
                         <td>
-                            <button onclick="sendMessage(5, -1)" type="button" class="btn btn-primary">Contraer</button>
+                            <button onclick="sendJointMessage(5, 1)" type="button" class="btn btn-primary">Bajar</button>
                         </td>
                         <td>
-                            <button onclick="sendMessage(5, 1)" type="button" class="btn btn-primary">Extender</button>
+                            <button onclick="sendJointMessage(5, -1)" type="button" class="btn btn-primary">Subir</button>
                         </td>
                       </tr>
                       <tr>
-                        <th scope="row">Joint 6</th>
+                        <th scope="row">6</th>
                         <td>Rotación garra</td>
                         <td>
-                            <button onclick="sendMessage(6, -1)" type="button" class="btn btn-primary">Anti horario</button>
+                            <button onclick="sendJointMessage(6, -1)" type="button" class="btn btn-primary">Anti horario</button>
                         </td>
                         <td>
-                            <button onclick="sendMessage(6, 1)" type="button" class="btn btn-primary">Horario</button>
+                            <button onclick="sendJointMessage(6, 1)" type="button" class="btn btn-primary">Horario</button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row"></th>
+                        <td>Garra</td>
+                        <td>
+                            <button onclick="sendJointMessage('claw', 'open')" type="button" class="btn btn-primary">Abrir</button>
+                        </td>
+                        <!--
+                        <td>
+                            <button onclick="sendJointMessage('claw', 'relax')" type="button" class="btn btn-primary">Neutral</button>
+                        </td>
+                        -->
+                        <td>
+                            <button onclick="sendJointMessage('claw', 'close')" type="button" class="btn btn-primary">Cerrar</button>
                         </td>
                       </tr>
                     </tbody>
                   </table>
             </div>
+        </div>
 
-            <div class="col-12 col-md-4 border p-3">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-12 col-md-6 border p-2 d-flex justify-content-center">
                 <img class="img-fluid p-3" src="{{ url_for('static', filename=diagram_img) }}" alt="diagram">
             </div>
-
         </div>
     </div>
 </section>
+
+<script>
+    var toggleButton = document.getElementById('toggleButton');
+    var absControls = document.getElementById('absControls');
+
+    toggleButton.addEventListener('click', function() {
+    if (absControls.classList.contains('show')) {
+        absControls.classList.remove('show');
+    } else {
+        absControls.classList.add('show');
+    }
+    });
+</script>
+
+<script>
+    var canvas = document.getElementById('myCanvas');
+    var ctx = canvas.getContext('2d');
+
+    compWidth = 0;
+    compHeight = 0;
+
+    /* Circles */
+    ctx.beginPath();
+    ctx.arc(270, 270, 270, 1.92, 0.22);
+    ctx.lineTo(270, 270);
+    ctx.closePath();
+    ctx.fillStyle = 'SandyBrown';
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.arc(270, 270, 150, 1.92, 0.22);
+    ctx.lineTo(270, 270);
+    ctx.closePath();
+    ctx.fillStyle = 'White'
+    ctx.fill();
+    /* Circles end */
+
+    /* Squares */
+
+    var size = 100; // Size of the square
+    var x = (canvas.width - size) / 2; // X-coordinate of the square's top-left corner
+    var y = (canvas.height - size) / 2; // Y-coordinate of the square's top-left corner
+    var color = 'red'; // Color of the square
+
+    ctx.fillStyle = 'SandyBrown';
+    ctx.fillRect(340, 340, 80, 80);
+    ctx.fillRect(340, 440, 80, 80);
+    ctx.fillRect(440, 340, 80, 80);
+    ctx.fillRect(440, 440, 80, 80);
+
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'White';
+    ctx.fillText('O', 380, 380);
+    ctx.fillText('C', 380, 480);
+    ctx.fillText('^', 480, 380);
+    ctx.fillText('v', 480, 480);
+    /* Squares end */
+
+    window.addEventListener('DOMContentLoaded', function() {
+        var container = document.querySelector('.square-container');
+        var computedStyle = getComputedStyle(container);
+
+        // Extract the width and height values from the computed style
+        var width = parseInt(computedStyle.width);
+        var height = parseInt(computedStyle.height);
+
+        // Set the canvas element's width and height to match the computed dimensions
+        compWidth = width;
+        compHeight = height;
+    });
+
+    canvas.addEventListener('click', function(event) {
+        var rect = canvas.getBoundingClientRect();
+        var x = event.clientX - rect.left;
+        var y = event.clientY - rect.top;
+        x = x / compWidth * 540;
+        y = y / compHeight * 540;
+
+        // DEBUG
+        console.log('Click position: ' + x + ', ' + y);
+        ctx.beginPath();
+        ctx.arc(x, y, 10, 0, 2 * Math.PI);
+        ctx.fillStyle = 'red';
+        ctx.fill();
+
+        if (x > 340 && y > 340) {
+            if (x > 340 && x < 420 && y > 340 && y < 420) {
+                sendJointMessage('claw', 'open')
+            } else if (x > 340 && x < 420 && y > 440 && y < 520) {
+                sendJointMessage('claw', 'close')
+            } else if (x > 440 && x < 520 && y > 340 && y < 420) {
+                sendXYZMessage('relxyz', 0, 0, 1, 0, 0, 0)
+            } else if (x > 440 && x < 520 && y > 440 && y < 520) {
+                sendXYZMessage('relxyz', 0, 0, -1, 0, 0, 0)
+            }
+
+
+        } else {
+            sendXYZMessage('xyz', 270-y, 270-x, 100);       // TO DO: What happens with invalid positions?
+        }     
+    });
+</script>
 
 </body>
 </html>
