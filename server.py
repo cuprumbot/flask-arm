@@ -1,17 +1,20 @@
 # Flask
 from flask import Flask, render_template, Response
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, send
 # Video stream
 import cv2
 # Arm control
 import json
 import robot_arm as ra
+from time import sleep
 
 # Inits
 app = Flask(__name__)
 video_capture = cv2.VideoCapture(0)
 socketio = SocketIO(app)
-lastTimestamp = 0
+accept = True
+
+DEBUG = True
 
 # Flask
 # Static page with an image, stream by sending images from camera
@@ -48,14 +51,22 @@ def handle_disconnect():
 
 @socketio.on('message')
 def handle_message(message):
+    global accept
+
     jsonMsg = json.loads(message)
     prettyMsg = json.dumps(jsonMsg, indent=4)
-    print("\n\n\n" + prettyMsg)
+    print("\n\n" + prettyMsg)
 
     try:
-        timestamp = int(jsonMsg['ts'])
+        if (accept):
+            accept = False
+            send("wait", broadcast=True)
 
-        if (timestamp > lastTimestamp):
+            if DEBUG:
+                sleep(1)
+                accept = True
+                send("ok", broacast=True)
+                return
 
             if (jsonMsg['joint'] == 'xyz'):
                 x = int(jsonMsg['x'])
@@ -67,7 +78,8 @@ def handle_message(message):
                 pitch = 0
                 yaw = 0
                 roll = 0
-                ra.moveAllToPosition(x, y, z, pitch, yaw, roll)
+                accept = ra.moveAllToPosition(x, y, z, pitch, yaw, roll)
+                send("ok", broadcast=True)
             elif (jsonMsg['joint'] == 'relxyz'):
                 x = int(jsonMsg['x'])
                 y = int(jsonMsg['y'])
@@ -78,7 +90,8 @@ def handle_message(message):
                 pitch = 0
                 yaw = 0
                 roll = 0
-                ra.moveAllToRelativePosition(x, y, z, pitch, yaw, roll)
+                accept = ra.moveAllToRelativePosition(x, y, z, pitch, yaw, roll)
+                send("ok", broadcast=True)
             elif (jsonMsg['joint'] == 'claw'):
                 action = jsonMsg['action']
                 if (action == 'open'):
@@ -90,16 +103,21 @@ def handle_message(message):
             else:
                 joint = int(jsonMsg['joint'])
                 action = int(jsonMsg['action'])
-                ra.moveSingleJointRelative(joint, action)
+                accept = ra.moveSingleJointRelative(joint, action)
+                send("ok", broadcast=True)
+        
+        else:
+            print("SLOW DOWN!")
                 
     except AttributeError as ae:
-        print("\n\n\nError!\nArm not initialized!")
+        print("\n\nError!\nArm not initialized!")
         print(ae)
     except KeyError as ke:
-        print("\n\n\nError!\nJoint or action not found!")
+        print("\n\nError!\nJoint or action not found!")
         print(ke)
 
 if __name__ == '__main__':
-    #ra.initArm()
-    #ra.initWeb()
+    if not DEBUG:
+        ra.initArm()
+        ra.initWeb()
     socketio.run(app, host='0.0.0.0')

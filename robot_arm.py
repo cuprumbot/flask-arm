@@ -38,9 +38,9 @@ arm = None
 def initArm():
   global arm
   print("Configuring arm...")
-  arm = WlkataMirobot(portname='COM12')
+  arm = WlkataMirobot(portname='COM13')
   arm.set_soft_limit(True)
-  arm.set_speed(2000)   
+  arm.set_speed(3000)   
   #arm.set_tool_type(WlkataMirobotTool.SUCTION_CUP)
   print("Arm config ready!")
 
@@ -60,72 +60,56 @@ def storeInBox():
 
 def printStatus():
   arm.get_status()
-  print(f"status: {arm.status}")
-  print(f"tool position: {arm.cartesian}")
+  print(f"angles: {arm.status.angle}")
+  print(f"position: {arm.cartesian}")
   print("\n\n\n")
-
-'''
-arm.angle.joint1
-arm.angle.joint2
-arm.angle.joint3
-arm.angle.joint4
-arm.angle.joint5
-arm.angle.joint6
-arm.pose.x
-arm.pose.y
-arm.pose.z
-arm.roll
-arm.pitch
-arm.yaw
-arm.valve_pwm
-arm.pump_pwm
-arm.gripper_pwm
-arm.motion_mode
-'''
 
 def updateArrays():
   global arm, currentAngles, currentPosition
-  arm.get_status()
+  printStatus()
 
-  currentAngles[1] = arm.angle.joint1
-  currentAngles[2] = arm.angle.joint2
-  currentAngles[3] = arm.angle.joint3
-  currentAngles[4] = arm.angle.joint4
-  currentAngles[5] = arm.angle.joint5
-  currentAngles[6] = arm.angle.joint6
+  currentAngles[BASE_ROTATION_JOINT]   = arm.angle.joint4   # rotacion base
+  currentAngles[BASE_ELEVATION_JOINT]  = arm.angle.joint5   # elevacion
+  currentAngles[ELBOW_JOINT]           = arm.angle.joint6   # codo
+  currentAngles[WRIST_ROTATION_JOINT]  = arm.angle.joint1   # rotacion muneca
+  currentAngles[WRIST_EXTENSION_JOINT] = arm.angle.joint2   # elevacion muneca
+  currentAngles[TOOL_ROTATION_JOINT]   = arm.angle.joint3   # rotacion herramienta
 
   currentPosition[X] = arm.pose.x
   currentPosition[Y] = arm.pose.y
   currentPosition[Z] = arm.pose.z
-  currentPosition[PITCH] = arm.pitch
-  currentPosition[YAW]   = arm.yaw
-  currentPosition[ROLL]  = arm.roll
+  currentPosition[PITCH] = arm.pose.pitch
+  currentPosition[YAW]   = arm.pose.yaw
+  currentPosition[ROLL]  = arm.pose.roll
+
+  print(currentAngles[1:])
+  print(currentPosition)
+  return True
 
 # ----- por posicion -----
-def moveAllToPosition(x, y, z, pitch, yaw, roll):
+def moveAllToPosition(x, y, z, roll, pitch, yaw):
   global arm
-  arm.p2p_interpolation(x, y, z, pitch, yaw, roll)      # TO DO: Que pasa si una coordenada es invalida?
-  updateArrays()
+  arm.p2p_interpolation(x, y, z, roll, pitch, yaw, wait_ok=True)
+  return updateArrays()
 
-def moveAllToRelativePosition(x, y, z, pitch, yaw, roll):
-  global currentAngles
+def moveAllToRelativePosition(x, y, z, roll, pitch, yaw):
+  global currentPosition
 
   newX = currentPosition[X] + (x * 10)
   newY = currentPosition[Y] + (y * 10)
   newZ = currentPosition[Z] + (z * 10)
+  newRoll  = currentPosition[ROLL]  + (roll  * 5)
   newPitch = currentPosition[PITCH] + (pitch * 5)
   newYaw   = currentPosition[YAW]   + (yaw   * 5)
-  newRoll  = currentPosition[ROLL]  + (roll  * 5)
 
-  moveAllToPosition(newX, newY, newZ, newPitch, newYaw, newRoll)
-  updateArrays()
+  return moveAllToPosition(newX, newY, newZ, newRoll, newPitch, newYaw)
 # ----------
 
 # ----- por angulo -----
 def moveSingleJoint(joint, angle):
   global arm
-  arm.set_joint_angle({joint:angle})
-  updateArrays()
+  arm.set_joint_angle({joint:angle}, wait_ok=True)
+  return updateArrays()
 
 def moveSingleJointRelative(joint, action):
   global currentAngles
@@ -137,21 +121,20 @@ def moveSingleJointRelative(joint, action):
   if (newAngle > maxAngles[joint]):
     newAngle = maxAngles[joint]
 
-  moveSingleJoint(joint, newAngle)
-  updateArrays()
+  return moveSingleJoint(joint, newAngle)
 # ----------
 
 def moveAllJoints(angle1, angle2, angle3, angle4, angle5, angle6):
   global arm
   target_angles = {1:angle1, 2:angle2, 3:angle3, 4:angle4, 5:angle5, 6:angle6}
-  arm.set_joint_angle(target_angles)
-  updateArrays()
+  arm.set_joint_angle(target_angles, wait_ok=True)
+  return updateArrays()
 
 def moveAllJointsArray(arr):
   global arm
   target_angles = {1:arr[1], 2:arr[2], 3:arr[3], 4:arr[4], 5:arr[5], 6:arr[6]}
-  arm.set_joint_angle(target_angles)
-  updateArrays()
+  arm.set_joint_angle(target_angles, wait_ok=True)
+  return updateArrays()
 
 def moveBaseRotation(angle):
   moveSingleJoint(1, angle)
@@ -210,28 +193,6 @@ def dropObject():
 if __name__ == "__main__":
   initArm()
 
-  # Move one joint
-  #moveSingleJoint(BASE_ROTATION_JOINT, -90)
-  #sleep(2)
-
-  # Move all joints
-  #moveAllJoints(0, 0, -30, 90, -90, -90)
-  #sleep(2)
-
-  # Move some joints
-  #arm.set_joint_angle({BASE_ROTATION_JOINT:90, BASE_ELEVATION_JOINT:60})
-  #sleep(2)
-
-  # Test the claw
-  #closeClaw()
-  #sleep(2)
-  #dropObject()
-  #sleep(2)
-
-  #arm.p2p_interpolation(200, 0, 100, 0, 0, -90)
-  #printStatus()
-  #sleep(3)
-
   while True:
     str = input("x y z: ")
     if (str == "q"):
@@ -250,7 +211,7 @@ if __name__ == "__main__":
         pitch = 0
         yaw = 0
         roll = 0
-      arm.p2p_interpolation(x, y, z, pitch, yaw, roll)
+      arm.p2p_interpolation(x, y, z, pitch, yaw, roll, wait_ok=True)
       printStatus()
       print("\n\n\n")
     except:

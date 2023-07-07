@@ -177,47 +177,18 @@
                     </tr>
                     <tr>
                         <td>
-                            <div class="knobContainer">
-                                <div style="display:inline;width:100px;height:100px;">
-                                    <input class="knob1" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="0" style="width: 50px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
+                            <div class="demo">
+                                <div style="display:inline;width:150px;height:200px;">
+                                    <canvas width="187" height="250" style="width: 150px; height: 200px;"></canvas>
+                                    <input class="knob" data-width="150" data-min="-90" data-max="90" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="0" style="width: 79px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
                                 </div>
                             </div>
                         </td>
-                        <td>
-                            <div class="knobContainer">
-                                <div style="display:inline;width:100px;height:100px;">
-                                    <input class="knob2" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="-30" style="width: 50px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="knobContainer">
-                                <div style="display:inline;width:100px;height:100px;">
-                                    <input class="knob3" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="35" style="width: 50px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="knobContainer">
-                                <div style="display:inline;width:100px;height:100px;">
-                                    <input class="knob4" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="0" style="width: 50px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="knobContainer">
-                                <div style="display:inline;width:100px;height:100px;">
-                                    <input class="knob5" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="-85" style="width: 50px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="knobContainer">
-                                <div style="display:inline;width:100px;height:100px;">
-                                    <input class="knob6" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="0" style="width: 50px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
-                                </div>
-                            </div>
-                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
                     </tr>
                 </table>
             </div>
@@ -317,99 +288,56 @@
 
 <script>
 $(function($) {
-    $(".knob1").knob({
-        'min': -110,
-        'max': 160,
-        'height': 100,
-        'width' : 100,
-        'angleOffset': 200,
-        'angleArc': 270,
-        'stopper': true,
-        'rotation': 'anticlockwise',
-
-        release : function (value) {
-            console.log("release : " + value);
-        }
-    });
-});
-$(function($) {
-    $(".knob2").knob({
-        'min': -35,
-        'max': 70,
-        'height': 100,
-        'width' : 100,
-        'angleOffset': 300,
-        'angleArc': 180,
-        'stopper': true,
-        'rotation': 'clockwise',
-
-        release : function (value) {
-            console.log("release : " + value);
-        }
-    });
-});
-$(function($) {
-    $(".knob3").knob({
+    $(".knob").knob({
         'min': -90,
-        'max': 60,
-        'height': 100,
-        'width' : 100,
-        'angleOffset': 0,
-        'angleArc': 180,
+        'max': 90,
+        'angleOffset': 180,
         'stopper': true,
-        'rotation': 'clockwise',
 
         release : function (value) {
+            //console.log(this.$.attr('value'));
             console.log("release : " + value);
+        },
+        cancel : function () {
+            console.log("cancel : ", this);
         }
-    });
-});
-$(function($) {
-    $(".knob4").knob({
-        'min': -145,
-        'max': 145,
-        'height': 100,
-        'width' : 100,
-        'angleOffset': 35,
-        'angleArc': 290,
-        'stopper': true,
-        'rotation': 'clockwise',
+        /*
+        draw : function () {
 
-        release : function (value) {
-            console.log("release : " + value);
-        }
-    });
-});
-$(function($) {
-    $(".knob5").knob({
-        'min': -180,
-        'max': 30,
-        'height': 100,
-        'width' : 100,
-        'angleOffset': 0,
-        'angleArc': 210,
-        'stopper': true,
-        'rotation': 'clockwise',
+            // "tron" case
+            if(this.$.data('skin') == 'tron') {
 
-        release : function (value) {
-            console.log("release : " + value);
-        }
-    });
-});
-$(function($) {
-    $(".knob6").knob({
-        'min': -160,
-        'max': 160,
-        'height': 100,
-        'width' : 100,
-        'angleOffset': 20,
-        'angleArc': 320,
-        'stopper': true,
-        'rotation': 'clockwise',
+                this.cursorExt = 0.3;
 
-        release : function (value) {
-            console.log("release : " + value);
+                var a = this.arc(this.cv)  // Arc
+                        , pa                   // Previous arc
+                        , r = 1;
+
+                this.g.lineWidth = this.lineWidth;
+
+                if (this.o.displayPrevious) {
+                    pa = this.arc(this.v);
+                    this.g.beginPath();
+                    this.g.strokeStyle = this.pColor;
+                    this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, pa.s, pa.e, pa.d);
+                    this.g.stroke();
+                }
+
+                this.g.beginPath();
+                this.g.strokeStyle = r ? this.o.fgColor : this.fgColor ;
+                this.g.arc(this.xy, this.xy, this.radius - this.lineWidth, a.s, a.e, a.d);
+                this.g.stroke();
+
+                this.g.lineWidth = 2;
+                this.g.beginPath();
+                this.g.strokeStyle = this.o.fgColor;
+                this.g.arc( this.xy, this.xy, this.radius - this.lineWidth + 1 + this.lineWidth * 2 / 3, 0, 2 * Math.PI, false);
+                this.g.stroke();
+
+                return false;
+            }
         }
+        */
     });
 });
 </script>
