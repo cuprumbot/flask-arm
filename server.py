@@ -14,7 +14,7 @@ video_capture = cv2.VideoCapture(0)
 socketio = SocketIO(app)
 accept = True
 
-DEBUG = True
+DEBUG = False
 
 # Flask
 # Static page with an image, stream by sending images from camera
@@ -68,7 +68,7 @@ def handle_message(message):
                 send("ok", broacast=True)
                 return
 
-            if (jsonMsg['joint'] == 'xyz'):
+            if (jsonMsg['joint'] == 'xyz'):             # semicirculo naranja
                 x = int(jsonMsg['x'])
                 y = int(jsonMsg['y'])
                 z = int(jsonMsg['z'])
@@ -78,9 +78,10 @@ def handle_message(message):
                 pitch = 0
                 yaw = 0
                 roll = 0
-                accept = ra.moveAllToPosition(x, y, z, pitch, yaw, roll)
-                send("ok", broadcast=True)
-            elif (jsonMsg['joint'] == 'relxyz'):
+                jStr = ra.moveAllToPosition(x, y, z, roll, pitch, yaw, "abs")
+                accept = True
+                send(jStr, broadcast=True)
+            elif (jsonMsg['joint'] == 'relxyz'):        # botones naranja arriba y abajo
                 x = int(jsonMsg['x'])
                 y = int(jsonMsg['y'])
                 z = int(jsonMsg['z'])
@@ -90,8 +91,9 @@ def handle_message(message):
                 pitch = 0
                 yaw = 0
                 roll = 0
-                accept = ra.moveAllToRelativePosition(x, y, z, pitch, yaw, roll)
-                send("ok", broadcast=True)
+                jStr = ra.moveAllToRelativePosition(x, y, z, roll, pitch, yaw)
+                accept = True
+                send(jStr, broadcast=True)
             elif (jsonMsg['joint'] == 'claw'):
                 action = jsonMsg['action']
                 if (action == 'open'):
@@ -100,11 +102,19 @@ def handle_message(message):
                     ra.relaxClaw()
                 elif (action == 'close'):
                     ra.closeClaw()
+                accept = True
+                send("claw", broadcast=True)
             else:
                 joint = int(jsonMsg['joint'])
-                action = int(jsonMsg['action'])
-                accept = ra.moveSingleJointRelative(joint, action)
-                send("ok", broadcast=True)
+                jStr = None
+                if "action" in jsonMsg:
+                    action = int(jsonMsg['action'])
+                    jStr = ra.moveSingleJointRelative(joint, action)
+                if "angle" in jsonMsg:
+                    angle = int(jsonMsg['angle'])
+                    jStr = ra.moveSingleJointAbsolute(joint, angle)
+                accept = True
+                send(jStr, broadcast=True)
         
         else:
             print("SLOW DOWN!")

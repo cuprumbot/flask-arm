@@ -1,6 +1,8 @@
 from wlkata_mirobot import WlkataMirobot
 from wlkata_mirobot import WlkataMirobotTool
 from time import sleep
+import math
+import json
 
 # constants
 BASE_ROTATION_JOINT = 1
@@ -14,15 +16,15 @@ TOOL_ROTATION_JOINT = 6
 X = 0
 Y = 1
 Z = 2
-PITCH = 3
-YAW = 4
-ROLL = 5
+ROLL = 3
+PITCH = 4
+YAW = 5
 
 storageAngles = [-1,    0,  -30,   35,    0,  -85,    0]   
 minAngles =     [-1, -110,  -30,  -90, -180, -180, -180]
 maxAngles =     [-1,  160,   70,   60,  145,    0,  180]
 
-currentAngles = [-1, 0, -30, 35, 0, -85, 0]
+currentAngles = [-1, 0, -30, 35, 0, 0, 0]
 currentPosition = [0, 0, 0, 0, 0, 0]
 
 '''
@@ -78,18 +80,72 @@ def updateArrays():
   currentPosition[X] = arm.pose.x
   currentPosition[Y] = arm.pose.y
   currentPosition[Z] = arm.pose.z
+  currentPosition[ROLL]  = arm.pose.roll
   currentPosition[PITCH] = arm.pose.pitch
   currentPosition[YAW]   = arm.pose.yaw
-  currentPosition[ROLL]  = arm.pose.roll
 
   print(currentAngles[1:])
   print(currentPosition)
-  return True
+
+  print("\n\nDEBUG YAW ARM")
+  resta = currentAngles[BASE_ROTATION_JOINT] - currentPosition[YAW]
+  print("base %i - yaw %i = resta %i" % (currentAngles[BASE_ROTATION_JOINT], currentPosition[YAW], resta))
+  print("some modulos %i %i %i" % (resta, (resta+180)%180, (resta+360)%180))
+
+  j = {
+    "status" : "ok",
+    "x" : currentPosition[X],
+    "y" : currentPosition[Y],
+    "z" : currentPosition[Z],
+    "roll" : currentPosition[ROLL],
+    "pitch" : currentPosition[PITCH],
+    "yaw" : currentPosition[YAW],
+    "j1" : currentAngles[BASE_ROTATION_JOINT],
+    "j2" : currentAngles[BASE_ELEVATION_JOINT],
+    "j3" : currentAngles[ELBOW_JOINT],
+    "j4" : currentAngles[WRIST_ROTATION_JOINT],
+    "j5" : currentAngles[WRIST_EXTENSION_JOINT],
+    "j6" : currentAngles[TOOL_ROTATION_JOINT]
+  }
+  jStr = json.dumps(j)
+  return jStr
 
 # ----- por posicion -----
-def moveAllToPosition(x, y, z, roll, pitch, yaw):
+def moveAllToPosition(x, y, z, roll, pitch, yaw, tipo):
   global arm
-  arm.p2p_interpolation(x, y, z, roll, pitch, yaw, wait_ok=True)
+
+  print("\n\nDEBUG ANGLE PREDICTION")
+
+  currBase = currentAngles[BASE_ROTATION_JOINT]
+  currYaw = currentPosition[YAW]
+  currRel = currBase - currYaw
+
+  if (x == 0):      # Division by zero
+    x = 1
+  angle = math.degrees(math.atan(y/x))
+  if (x < 0):
+    if (y > 0):
+        angle = angle + 180
+    elif (y < 0):
+        angle = angle - 180
+
+  print("BASE ANGLE: ", angle)
+  calcYaw = angle - currRel
+  print("CALC YAW", calcYaw)
+
+  print(f'original   {currBase} - {currYaw} = {currRel}')
+  print(f'nuevos     {angle} - {calcYaw} = {angle - calcYaw}')
+
+  # keep position
+  newRoll  = currentPosition[ROLL]
+  newPitch = currentPosition[PITCH]
+
+  if (tipo == "rel"):
+    newYaw = currentPosition[YAW]
+  else:
+    newYaw = calcYaw
+
+  arm.p2p_interpolation(x, y, z, newRoll, newPitch, newYaw, wait_ok=True)
   return updateArrays()
 
 def moveAllToRelativePosition(x, y, z, roll, pitch, yaw):
@@ -102,7 +158,7 @@ def moveAllToRelativePosition(x, y, z, roll, pitch, yaw):
   newPitch = currentPosition[PITCH] + (pitch * 5)
   newYaw   = currentPosition[YAW]   + (yaw   * 5)
 
-  return moveAllToPosition(newX, newY, newZ, newRoll, newPitch, newYaw)
+  return moveAllToPosition(newX, newY, newZ, newRoll, newPitch, newYaw, "rel")
 # ----------
 
 # ----- por angulo -----
@@ -122,6 +178,16 @@ def moveSingleJointRelative(joint, action):
     newAngle = maxAngles[joint]
 
   return moveSingleJoint(joint, newAngle)
+
+def moveSingleJointAbsolute(joint, angle):
+  global currentAngles
+
+  if (angle < minAngles[joint]):
+    angle = minAngles[joint]
+  if (angle > maxAngles[joint]):
+    angle = maxAngles[joint]
+
+  return moveSingleJoint(joint, angle)
 # ----------
 
 def moveAllJoints(angle1, angle2, angle3, angle4, angle5, angle6):
@@ -204,14 +270,15 @@ if __name__ == "__main__":
       y = int(arr[1])
       z = int(arr[2])
       if (len(arr) > 3):
-        pitch = int(arr[3])
-        yaw = int(arr[4])
-        roll = int(arr[5])
+        print("got roll+pitch+yaw")
+        roll = int(arr[3])
+        pitch = int(arr[4])
+        yaw = int(arr[5])
       else:
         pitch = 0
         yaw = 0
         roll = 0
-      arm.p2p_interpolation(x, y, z, pitch, yaw, roll, wait_ok=True)
+      arm.p2p_interpolation(x, y, z, roll, pitch, yaw, wait_ok=True)
       printStatus()
       print("\n\n\n")
     except:
@@ -228,9 +295,9 @@ if __name__ == "__main__":
 
   arm.linear_interpolation(200, -50, 150)
 
-  ex, ey = (0, -80) 	# target coordinates, in mm(relative to current point)
-  radius = 100		    # radius, unit in mm
-  is_cw = False		    # Movement direction True: clockwise, False: counterclockwise
+  ex, ey = (0, -80)     # target coordinates, in mm(relative to current point)
+  radius = 100          # radius, unit in mm
+  is_cw = False         # Movement direction True: clockwise, False: counterclockwise
   arm.circular_interpolation(ex, ey, radius, is_cw=is_cw)
 
   arm.set_door_lift_distance(50)

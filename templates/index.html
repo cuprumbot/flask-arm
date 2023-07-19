@@ -55,9 +55,32 @@
 
         // Event handler for custom event 'message'
         socket.on('message', function(data) {
-            var statusButton = document.getElementById('statusButton');
-            statusButton.style.backgroundColor = (data == "ok") ? 'green' : 'red';
-            statusButton.innerHTML = (data == "ok") ? 'Ready!' : 'Waiting...';
+
+            if (data == "wait") {
+                var statusButton = document.getElementById('statusButton');
+                statusButton.style.backgroundColor = 'red';
+                statusButton.innerHTML = 'Waiting...';
+            } else if (data == "ok") {
+                var statusButton = document.getElementById('statusButton');
+                statusButton.style.backgroundColor = 'green';
+                statusButton.innerHTML = 'Ready!';
+            } else {
+                jObj = JSON.parse(data);
+
+                console.log(jObj);
+
+                $('.knob1').val(parseInt(jObj['j1']));
+                $('.knob2').val(parseInt(jObj['j2']));
+                $('.knob3').val(parseInt(jObj['j3']));
+                $('.knob4').val(parseInt(jObj['j4']));
+                $('.knob5').val(parseInt(jObj['j5']));
+                $('.knob6').val(parseInt(jObj['j6']));
+
+                var statusButton = document.getElementById('statusButton');
+                statusButton.style.backgroundColor = 'green';
+                statusButton.innerHTML = 'Ready!';
+            }
+            
         });
 
         // Send a custom message to the server
@@ -66,6 +89,16 @@
                 ts: Date.now(),
                 joint: joint,
                 action: action
+            };
+            let jsonMsg = JSON.stringify(msg);
+            socket.emit('message', jsonMsg);
+        }
+
+        function sendJointMessageAbsolute(joint, angle) {
+            let msg = {
+                ts: Date.now(),
+                joint: joint,
+                angle: angle
             };
             let jsonMsg = JSON.stringify(msg);
             socket.emit('message', jsonMsg);
@@ -87,8 +120,8 @@
         }
     </script>
 </head>
-<>
 
+<body>
 <section class="pt100 pb100">
     <div class="container" id="arm">
         <div class="row justify-content-center align-items-center">
@@ -179,7 +212,7 @@
                         <td>
                             <div class="knobContainer">
                                 <div style="display:inline;width:100px;height:100px;">
-                                    <input class="knob1" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="0" style="width: 50px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
+                                    <input class="knob1" id="knob1" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="0" style="width: 50px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
                                 </div>
                             </div>
                         </td>
@@ -293,11 +326,6 @@
                         <td>
                             <button onclick="sendJointMessage('claw', 'open')" type="button" class="btn btn-primary">Abrir</button>
                         </td>
-                        <!--
-                        <td>
-                            <button onclick="sendJointMessage('claw', 'relax')" type="button" class="btn btn-primary">Neutral</button>
-                        </td>
-                        -->
                         <td>
                             <button onclick="sendJointMessage('claw', 'close')" type="button" class="btn btn-primary">Cerrar</button>
                         </td>
@@ -328,7 +356,8 @@ $(function($) {
         'rotation': 'anticlockwise',
 
         release : function (value) {
-            console.log("release : " + value);
+            sendJointMessageAbsolute(1, value);
+            console.log("release 1: " + value);
         }
     });
 });
@@ -344,7 +373,8 @@ $(function($) {
         'rotation': 'clockwise',
 
         release : function (value) {
-            console.log("release : " + value);
+            sendJointMessageAbsolute(2, value);
+            console.log("release 2: " + value);
         }
     });
 });
@@ -360,7 +390,8 @@ $(function($) {
         'rotation': 'clockwise',
 
         release : function (value) {
-            console.log("release : " + value);
+            sendJointMessageAbsolute(3, value);
+            console.log("release 3: " + value);
         }
     });
 });
@@ -376,14 +407,15 @@ $(function($) {
         'rotation': 'clockwise',
 
         release : function (value) {
-            console.log("release : " + value);
+            sendJointMessageAbsolute(4, value);
+            console.log("release 4: " + value);
         }
     });
 });
 $(function($) {
     $(".knob5").knob({
         'min': -180,
-        'max': 30,
+        'max': 0,
         'height': 100,
         'width' : 100,
         'angleOffset': 0,
@@ -392,7 +424,8 @@ $(function($) {
         'rotation': 'clockwise',
 
         release : function (value) {
-            console.log("release : " + value);
+            sendJointMessageAbsolute(5, value);
+            console.log("release 5: " + value);
         }
     });
 });
@@ -408,7 +441,8 @@ $(function($) {
         'rotation': 'clockwise',
 
         release : function (value) {
-            console.log("release : " + value);
+            sendJointMessageAbsolute(6, value);
+            console.log("release 6: " + value);
         }
     });
 });
@@ -424,14 +458,14 @@ $(function($) {
 
     /* Circles */
     ctx.beginPath();
-    ctx.arc(300, 300, 300, 1.92, 0.22);
+    ctx.arc(300, 300, 300, 1.92, 0.35);
     ctx.lineTo(300, 300);
     ctx.closePath();
     ctx.fillStyle = 'SandyBrown';
     ctx.fill();
     
     ctx.beginPath();
-    ctx.arc(300, 300, 131, 1.92, 0.22);
+    ctx.arc(300, 300, 131, 1.92, 0.35);
     ctx.lineTo(300, 300);
     ctx.closePath();
     ctx.fillStyle = 'White'
@@ -446,19 +480,19 @@ $(function($) {
     var color = 'red'; // Color of the square
 
     ctx.fillStyle = 'SandyBrown';
-    ctx.fillRect(400, 400, 80, 80);
-    ctx.fillRect(400, 500, 80, 80);
-    ctx.fillRect(500, 400, 80, 80);
-    ctx.fillRect(500, 500, 80, 80);
+    ctx.fillRect(420, 420, 80, 80);
+    ctx.fillRect(420, 520, 80, 80);
+    ctx.fillRect(520, 420, 80, 80);
+    ctx.fillRect(520, 520, 80, 80);
 
     ctx.font = 'bold 24px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = 'White';
-    ctx.fillText('O', 440, 440);
-    ctx.fillText('C', 440, 540);
-    ctx.fillText('^', 540, 440);
-    ctx.fillText('v', 540, 540);
+    ctx.fillText('O', 460, 460);
+    ctx.fillText('C', 460, 560);
+    ctx.fillText('^', 560, 460);
+    ctx.fillText('v', 560, 560);
     /* Squares end */
 
     window.addEventListener('DOMContentLoaded', function() {
@@ -488,14 +522,14 @@ $(function($) {
         ctx.fillStyle = 'red';
         ctx.fill();
 
-        if (x > 400 && y > 400) {
-            if (x > 400 && x < 480 && y > 400 && y < 480) {
+        if (x > 420 && y > 420) {
+            if (x > 420 && x < 500 && y > 420 && y < 500) {
                 sendJointMessage('claw', 'open')
-            } else if (x > 400 && x < 480 && y > 500 && y < 580) {
+            } else if (x > 420 && x < 500 && y > 520 && y < 600) {
                 sendJointMessage('claw', 'close')
-            } else if (x > 500 && x < 580 && y > 400 && y < 480) {
+            } else if (x > 520 && x < 500 && y > 420 && y < 500) {
                 sendXYZMessage('relxyz', 0, 0, 1, 0, 0, 0)
-            } else if (x > 500 && x < 580 && y > 500 && y < 580) {
+            } else if (x > 520 && x < 500 && y > 520 && y < 600) {
                 sendXYZMessage('relxyz', 0, 0, -1, 0, 0, 0)
             }
 
