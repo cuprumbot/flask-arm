@@ -14,14 +14,19 @@ video_capture = cv2.VideoCapture(0)
 socketio = SocketIO(app)
 accept = True
 
-DEBUG = False
+DEBUG = True
 
 # Flask
 # Static page with an image, stream by sending images from camera
 @app.route('/')
 def index():
     diagram_img = "completo.png"
-    return render_template('index.html', diagram_img=diagram_img)
+    bootstrap_js = "bootstrap.min.js"
+    bootstrap_css = "bootstrap.min.css"
+    jquery_js = "jquery.min.js"
+    jquery_knob_js = "jquery.knob.min.js"
+    socket_io_js = "socket.io.js"
+    return render_template('index.html', diagram_img=diagram_img, bootstrap_js=bootstrap_js, bootstrap_css=bootstrap_css, jquery_js=jquery_js, jquery_knob_js=jquery_knob_js, socket_io_js=socket_io_js)
 
 def generate_frames():
     while True:

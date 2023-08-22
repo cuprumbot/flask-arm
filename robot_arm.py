@@ -27,14 +27,6 @@ maxAngles =     [-1,  160,   70,   60,  145,    0,  180]
 currentAngles = [-1, 0, -30, 35, 0, 0, 0]
 currentPosition = [0, 0, 0, 0, 0, 0]
 
-'''
-WlkataMirobotTool defines:
-  NO_TOOL
-  SUCTION_CUP
-  GRIPPER
-  FLEXIBLE_CLAW
-'''
-
 arm = None
 
 def initArm():
@@ -43,7 +35,7 @@ def initArm():
   arm = WlkataMirobot(portname='COM13')
   arm.set_soft_limit(True)
   arm.set_speed(3000)   
-  #arm.set_tool_type(WlkataMirobotTool.SUCTION_CUP)
+  # arm.set_tool_type(WlkataMirobotTool.SUCTION_CUP)
   print("Arm config ready!")
 
   print("Homing...")
@@ -62,9 +54,10 @@ def storeInBox():
 
 def printStatus():
   arm.get_status()
+  print("\n--------------------")
   print(f"angles: {arm.status.angle}")
   print(f"position: {arm.cartesian}")
-  print("\n\n\n")
+  print("--------------------\n")
 
 def updateArrays():
   global arm, currentAngles, currentPosition
@@ -84,13 +77,18 @@ def updateArrays():
   currentPosition[PITCH] = arm.pose.pitch
   currentPosition[YAW]   = arm.pose.yaw
 
-  print(currentAngles[1:])
-  print(currentPosition)
+  print("\n--------------------")
+  print("angulos: ", currentAngles[1:])
+  print("xyz rpy: ", currentPosition)
+  print("--------------------\n")
 
+  # FIND ME
+  '''
   print("\n\nDEBUG YAW ARM")
   resta = currentAngles[BASE_ROTATION_JOINT] - currentPosition[YAW]
   print("base %i - yaw %i = resta %i" % (currentAngles[BASE_ROTATION_JOINT], currentPosition[YAW], resta))
   print("some modulos %i %i %i" % (resta, (resta+180)%180, (resta+360)%180))
+  '''
 
   j = {
     "status" : "ok",
@@ -114,29 +112,47 @@ def updateArrays():
 def moveAllToPosition(x, y, z, roll, pitch, yaw, tipo):
   global arm
 
-  print("\n\nDEBUG ANGLE PREDICTION")
+  # We cannot use the base rotation angle
+  # We must use the resulting X and Y coords to get the resulting angle
+  currX = currentPosition[X]
+  currY = currentPosition[Y]
+  if (currX == 0):    # Division by zero
+    currX = 1
+  currAngle = math.degrees(math.atan(currY/currX))
+  if (currX < 0):
+    if (currY > 0):
+      currAngle = currAngle + 180
+    elif (y < 0):
+      currAngle = currAngle - 180
+  currBase = currAngle
 
-  currBase = currentAngles[BASE_ROTATION_JOINT]
+  # This relation must hold true at the end
   currYaw = currentPosition[YAW]
   currRel = currBase - currYaw
 
+  # Use the new X and Y coords to get the resulting angle
   if (x == 0):      # Division by zero
     x = 1
   angle = math.degrees(math.atan(y/x))
   if (x < 0):
     if (y > 0):
-        angle = angle + 180
+      angle = angle + 180
     elif (y < 0):
-        angle = angle - 180
+      angle = angle - 180
 
-  print("BASE ANGLE: ", angle)
+  # The relation between angles holds true
   calcYaw = angle - currRel
-  print("CALC YAW", calcYaw)
 
+  # FIND ME
+  print("\n--------------------")
+  print("DEBUG ANGLE PREDICTION")
+  print("BASE ANGLE: ", angle)
+  print("CALC YAW:   ", calcYaw)
   print(f'original   {currBase} - {currYaw} = {currRel}')
   print(f'nuevos     {angle} - {calcYaw} = {angle - calcYaw}')
+  print("--------------------\n")
 
-  # keep position
+  # Don't change these angles             # TO DO: remove these from p2p call
   newRoll  = currentPosition[ROLL]
   newPitch = currentPosition[PITCH]
 
@@ -144,6 +160,9 @@ def moveAllToPosition(x, y, z, roll, pitch, yaw, tipo):
     newYaw = currentPosition[YAW]
   else:
     newYaw = calcYaw
+
+  # Use this if the 'chicken mode' is unpopular
+  # newYaw = calcYaw
 
   arm.p2p_interpolation(x, y, z, newRoll, newPitch, newYaw, wait_ok=True)
   return updateArrays()
@@ -158,6 +177,7 @@ def moveAllToRelativePosition(x, y, z, roll, pitch, yaw):
   newPitch = currentPosition[PITCH] + (pitch * 5)
   newYaw   = currentPosition[YAW]   + (yaw   * 5)
 
+  # newRoll, newPitch, newYaw are irrelevant
   return moveAllToPosition(newX, newY, newZ, newRoll, newPitch, newYaw, "rel")
 # ----------
 
@@ -275,14 +295,15 @@ if __name__ == "__main__":
         pitch = int(arr[4])
         yaw = int(arr[5])
       else:
+        roll = 0
         pitch = 0
         yaw = 0
-        roll = 0
+        
       arm.p2p_interpolation(x, y, z, roll, pitch, yaw, wait_ok=True)
       printStatus()
       print("\n\n\n")
     except:
-      print("\nerror reading xyz\n\n\n")
+      print("error reading xyz\n\n\n")
 
   storeInBox()
   sleep(3)
