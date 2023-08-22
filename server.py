@@ -14,7 +14,7 @@ video_capture = cv2.VideoCapture(0)
 socketio = SocketIO(app)
 accept = True
 
-DEBUG = True
+DEBUG = False
 
 # Flask
 # Static page with an image, stream by sending images from camera
