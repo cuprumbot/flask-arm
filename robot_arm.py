@@ -164,7 +164,9 @@ def moveAllToPosition(x, y, z, roll, pitch, yaw, tipo):
   # Use this if the 'chicken mode' is unpopular
   # newYaw = calcYaw
 
-  arm.p2p_interpolation(x, y, z, newRoll, newPitch, newYaw, wait_ok=True)
+  newZ = currentPosition[Z]
+
+  arm.p2p_interpolation(x, y, newZ, newRoll, newPitch, newYaw, wait_ok=True)
   return updateArrays()
 
 def moveAllToRelativePosition(x, y, z, roll, pitch, yaw):

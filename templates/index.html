@@ -10,13 +10,12 @@
     <link rel="stylesheet" href="{{ url_for( 'static', filename=bootstrap_css) }}">
 
     <style>
-        .table button {
-            width: 100px;
+        .table-grid {
             font-size: 14px;
         }
         .table-grid button {
-            width: 50px;
-            font-size: 16px
+            width: 45px;
+            font-size: 14px
         }
 
         .square-container {
@@ -140,19 +139,19 @@
         -->
 
         <div class="row justify-content-center align-items-center">
-            <div class="col-8 col-md-12 border p-2 d-flex justify-content-center">
+            <div class="col-10 col-md-12 d-flex justify-content-center">
                 <button class="btn btn-secondary btn-sm" type="button" id="statusButton">Status</button>
             </div>
         </div>
 
         <div class="row justify-content-center align-items-center collapse show" id="absControls">
-            <div class="col-8 col-md-6 border p-2 d-flex justify-content-center">
+            <div class="col-10 col-md-6 border p-2 d-flex justify-content-center">
                 <div class="square-container">
-                    <canvas id="myCanvas" class="border" width="600" height="600"></canvas>
+                    <canvas id="myCanvas" class="border" width="500" height="500"></canvas>
                 </div>
             </div>
 
-            <div class="col-8 col-md-6 border p-2 d-flex justify-content-center">
+            <div class="col-10 col-md-6 border p-2 d-flex justify-content-center">
                 <table class="table-grid">
                     <tbody>
                       <tr>
@@ -206,11 +205,12 @@
             </div>
         </div>
 
+<!--
         <div class="row justify-content-center align-items-center">
             <div class="col-4 col-md-2 border p-2 d-flex flex-column justify-content-center">
                 <div>Rotación</div>
                 <div class="knobContainer">
-                    <div style="display:inline;width:100px;height:100px;">
+                    <div style="display:inline;width:70px;height:70px;">
                         <input class="knob1" id="knob1" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="0" style="width: 50px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
                     </div>
                 </div>
@@ -218,7 +218,7 @@
             <div class="col-4 col-md-2 border p-2 d-flex flex-column justify-content-center">
                 <div>Elevación</div>
                 <div class="knobContainer">
-                    <div style="display:inline;width:100px;height:100px;">
+                    <div style="display:inline;width:70px;height:70px;">
                         <input class="knob2" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="-30" style="width: 50px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
                     </div>
                 </div>
@@ -226,7 +226,7 @@
             <div class="col-4 col-md-2 border p-2 d-flex flex-column justify-content-center">
                 <div>Codo</div>
                 <div class="knobContainer">
-                    <div style="display:inline;width:100px;height:100px;">
+                    <div style="display:inline;width:70px;height:70px;">
                         <input class="knob3" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="35" style="width: 50px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
                     </div>
                 </div>
@@ -234,7 +234,7 @@
             <div class="col-4 col-md-2 border p-2 d-flex flex-column justify-content-center">
                 <div>Rotación muñeca</div>
                 <div class="knobContainer">
-                    <div style="display:inline;width:100px;height:100px;">
+                    <div style="display:inline;width:70px;height:70px;">
                         <input class="knob4" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="0" style="width: 50px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
                     </div>
                 </div>
@@ -242,7 +242,7 @@
             <div class="col-4 col-md-2 border p-2 d-flex flex-column justify-content-center">
                 <div>Elevación muñeca</div>
                 <div class="knobContainer">
-                    <div style="display:inline;width:100px;height:100px;">
+                    <div style="display:inline;width:70px;height:70px;">
                         <input class="knob5" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="-85" style="width: 50px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
                     </div>
                 </div>
@@ -250,93 +250,13 @@
             <div class="col-4 col-md-2 border p-2 d-flex flex-column justify-content-center">
                 <div>Rotación garra</div>
                 <div class="knobContainer">
-                    <div style="display:inline;width:100px;height:100px;">
+                    <div style="display:inline;width:70px;height:70px;">
                         <input class="knob6" data-cursor="true" data-fgcolor="#222222" data-thickness=".3" value="0" style="width: 50px; height: 50px; position: absolute; vertical-align: middle; margin-top: 50px; margin-left: -114px; border: 0px; background: none; font: bold 30px Arial; text-align: center; color: rgb(34, 34, 34); padding: 0px; appearance: none;">
                     </div>
                 </div>
             </div>
         </div>
-
-        <!--
-        <div class="row justify-content-center align-items-center">  
-            <div class="col-12 col-md-8 border p-2 d-flex justify-content-center">
-                <table class="table">
-                    <tbody>
-                      <tr>
-                        <th scope="row">1</th>
-                        <td>Rotación</td>
-                        <td>
-                            <button onclick="sendJointMessage(1, 1)" type="button" class="btn btn-primary">Anti horario</button>
-                        </td>
-                        <td>
-                            <button onclick="sendJointMessage(1, -1)" type="button" class="btn btn-primary">Horario</button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th scope="row">2</th>
-                        <td>Elevación</td>
-                        <td>
-                            <button onclick="sendJointMessage(2, 1)" type="button" class="btn btn-primary">Bajar</button>
-                        </td>
-                        <td>
-                            <button onclick="sendJointMessage(2, -1)" type="button" class="btn btn-primary">Subir</button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th scope="row">3</th>
-                        <td>Codo</td>
-                        <td>
-                            <button onclick="sendJointMessage(3, 1)" type="button" class="btn btn-primary">Doblar</button>
-                        </td>
-                        <td>
-                            <button onclick="sendJointMessage(3, -1)" type="button" class="btn btn-primary">Estirar</button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th scope="row">4</th>
-                        <td>Rotación muñeca</td>
-                        <td>
-                            <button onclick="sendJointMessage(4, 1)" type="button" class="btn btn-primary">Anti horario</button>
-                        </td>
-                        <td>
-                            <button onclick="sendJointMessage(4, -1)" type="button" class="btn btn-primary">Horario</button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th scope="row">5</th>
-                        <td>Elevación muñeca</td>
-                        <td>
-                            <button onclick="sendJointMessage(5, 1)" type="button" class="btn btn-primary">Bajar</button>
-                        </td>
-                        <td>
-                            <button onclick="sendJointMessage(5, -1)" type="button" class="btn btn-primary">Subir</button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th scope="row">6</th>
-                        <td>Rotación garra</td>
-                        <td>
-                            <button onclick="sendJointMessage(6, -1)" type="button" class="btn btn-primary">Anti horario</button>
-                        </td>
-                        <td>
-                            <button onclick="sendJointMessage(6, 1)" type="button" class="btn btn-primary">Horario</button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th scope="row"></th>
-                        <td>Garra</td>
-                        <td>
-                            <button onclick="sendJointMessage('claw', 'open')" type="button" class="btn btn-primary">Abrir</button>
-                        </td>
-                        <td>
-                            <button onclick="sendJointMessage('claw', 'close')" type="button" class="btn btn-primary">Cerrar</button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-            </div>
-        </div>
-        -->
+-->
 
         <!--
         <div class="row justify-content-center align-items-center">
@@ -353,8 +273,8 @@ $(function($) {
     $(".knob1").knob({
         'min': -110,
         'max': 160,
-        'height': 100,
-        'width' : 100,
+        'height': 80,
+        'width' : 80,
         'angleOffset': 200,
         'angleArc': 270,
         'stopper': true,
@@ -370,8 +290,8 @@ $(function($) {
     $(".knob2").knob({
         'min': -35,
         'max': 70,
-        'height': 100,
-        'width' : 100,
+        'height': 80,
+        'width' : 80,
         'angleOffset': 300,
         'angleArc': 180,
         'stopper': true,
@@ -387,8 +307,8 @@ $(function($) {
     $(".knob3").knob({
         'min': -90,
         'max': 60,
-        'height': 100,
-        'width' : 100,
+        'height': 80,
+        'width' : 80,
         'angleOffset': 0,
         'angleArc': 180,
         'stopper': true,
@@ -404,8 +324,8 @@ $(function($) {
     $(".knob4").knob({
         'min': -145,
         'max': 145,
-        'height': 100,
-        'width' : 100,
+        'height': 80,
+        'width' : 80,
         'angleOffset': 35,
         'angleArc': 290,
         'stopper': true,
@@ -421,8 +341,8 @@ $(function($) {
     $(".knob5").knob({
         'min': -180,
         'max': 0,
-        'height': 100,
-        'width' : 100,
+        'height': 80,
+        'width' : 80,
         'angleOffset': 0,
         'angleArc': 210,
         'stopper': true,
@@ -438,8 +358,8 @@ $(function($) {
     $(".knob6").knob({
         'min': -160,
         'max': 160,
-        'height': 100,
-        'width' : 100,
+        'height': 80,
+        'width' : 80,
         'angleOffset': 20,
         'angleArc': 320,
         'stopper': true,
@@ -454,6 +374,9 @@ $(function($) {
 </script>
 
 <script>
+    var sqSize = 500;
+    var mdSize = sqSize / 2;
+
     var canvas = document.getElementById('myCanvas');
     var ctx = canvas.getContext('2d');
 
@@ -462,15 +385,15 @@ $(function($) {
 
     /* Circles */
     ctx.beginPath();
-    ctx.arc(300, 300, 300, 1.92, 0.35);
-    ctx.lineTo(300, 300);
+    ctx.arc(mdSize, mdSize, mdSize, 1.92, 0.35);
+    ctx.lineTo(mdSize, mdSize);
     ctx.closePath();
     ctx.fillStyle = 'SandyBrown';
     ctx.fill();
     
     ctx.beginPath();
-    ctx.arc(300, 300, 131, 1.92, 0.35);
-    ctx.lineTo(300, 300);
+    ctx.arc(mdSize, mdSize, 131/300*mdSize, 1.92, 0.35);
+    ctx.lineTo(mdSize, mdSize);
     ctx.closePath();
     ctx.fillStyle = 'White'
     ctx.fill();
@@ -482,10 +405,10 @@ $(function($) {
     var y = (canvas.height - size) / 2; // Y-coordinate of the square's top-left corner
     var color = 'red'; // Color of the square
 
-    var rx = 420;
-    var ry = 420;
-    var rw = 80;
-    var rh = 80;
+    var rx = 420/600*sqSize;
+    var ry = 420/600*sqSize;
+    var rw = 80/600*sqSize;
+    var rh = 80/600*sqSize;
 
     ctx.fillStyle = 'SandyBrown';
     ctx.fillRect(rx, ry, rw, rh);
@@ -524,8 +447,8 @@ $(function($) {
         var rect = canvas.getBoundingClientRect();
         var x = event.clientX - rect.left;
         var y = event.clientY - rect.top;
-        x = x / compWidth * 600;
-        y = y / compHeight * 600;
+        x = x / compWidth * sqSize;
+        y = y / compHeight * sqSize;
 
         // DEBUG
         console.log('Click position: ' + x + ', ' + y);
@@ -533,6 +456,8 @@ $(function($) {
         ctx.arc(x, y, 2, 0, 2 * Math.PI);
         ctx.fillStyle = 'red';
         ctx.fill();
+
+        var factor = mdSize/300;
 
         if (x > rx && y > ry) {
             if (x > rx && x < rx+rw && y > ry && y < ry+rh) {
@@ -549,7 +474,7 @@ $(function($) {
                 sendXYZMessage('relxyz', 0, 0, -1, 0, 0, 0);
             }
         } else {
-            sendXYZMessage('xyz', 300-y, 300-x, 100);
+            sendXYZMessage('xyz', (mdSize-y)/factor, (mdSize-x)/factor, 100);
         }     
     });
 </script>
