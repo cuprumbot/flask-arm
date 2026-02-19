@@ -32,7 +32,7 @@ arm = None
 def initArm():
   global arm
   print("Configuring arm...")
-  arm = WlkataMirobot(portname='COM13')
+  arm = WlkataMirobot(portname='COM6')
   arm.set_soft_limit(True)
   arm.set_speed(3000)   
   # arm.set_tool_type(WlkataMirobotTool.SUCTION_CUP)

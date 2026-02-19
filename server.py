@@ -135,4 +135,4 @@ if __name__ == '__main__':
     if not DEBUG:
         ra.initArm()
         ra.initWeb()
-    socketio.run(app, host='0.0.0.0')
+    socketio.run(app, host='0.0.0.0', port=5000)
